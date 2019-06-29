@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script rel="script" src=js/bootstrap.min.js></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <style>
+        div.body{
+            background-image: url("img/Pizza.jpg") ;
+            background-attachment: fixed;
+            background-size: cover;
+            height: 100%;
+        }
+        body{
+            height: 100vh;
+            direction: rtl;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            var catsize=0;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "http://localhost:8080/api/category",true);
+
+            xhr.onload = function() {
+                var mydata = JSON.parse(this.responseText);
+                catsize=mydata.length;
+                var text="";
+                for (var x=0;x<mydata.length;x++)
+                {
+                    text+='<div class="checkbox">\n' +
+                        '                <label><input id="cat'+x+'" type="checkbox" value="">'+mydata[x].name+'</label>\n' +
+                        '            </div>';
+                }
+                $(".filter").html(text);
+            };
+            xhr.send();
+
+
+            $("#search").click(function () {
+                $('html, body').animate({ scrollTop:  $("#main").offset().top - 50 }, 'slow');
+                var formData=new FormData();
+                formData.append("city", $("#city").val());
+                formData.append("area", $("#area").val());
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "http://localhost:8080/api/restaurant",true);
+
+                xhr.onload = function() {
+                    var mydata = JSON.parse(this.responseText);
+                    var text="";
+                    for (var x=0;x<mydata.length;x++)
+                    {
+                        var cat="";
+                        var address=mydata[x].address.city+" "+mydata[x].address.area+" "+mydata[x].address.addressLine+" "+mydata[x].openingTime+"الی"+mydata[x].closingTime;
+                        for (var y=0;y<mydata[x].categories.length;y++)
+                            cat+=mydata[x].categories[y].category.name+"-";
+                        text+='<div class="resturan row" >\n' +
+                            '            <div class="col-md-4 text-center">\n' +
+                            '                <img src="http://localhost:8080/api'+mydata[x].logo+'" height="70px" width="70px">\n' +
+                            '            </div>\n' +
+                            '            <div class="col-md-8 text-right">\n' +
+                            '                <h3>'+mydata[x].name+'</h3><br>\n' +
+                            '                <h6 style="color: gold">'+mydata[x].averageRate+'</h6><br>\n' +
+                            '                <b>'+cat+'</b><br>\n' +
+                            '                <b>'+address+'</b>\n' +
+                            '            </div>\n' +
+                            '        </div>';
+                    }
+                    $("#main").html(text);
+                };
+                xhr.send(formData);
+            });
+
+            $(".filter").on('click', 'div label input', function() {
+
+                var catArr = [];
+                for (var y = 0; y < catsize; y++)
+                    if ($("#cat" + y).prop("checked")) {
+                        catArr.push($("#cat" + y).parent("label").text());
+                        console.log(y);
+                    }
+                var formData=new FormData();
+                formData.append("city", $("#city").val());
+                formData.append("area", $("#area").val());
+                if (catArr.length!=0)
+                    formData.append("category",catArr);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "http://localhost:8080/api/restaurant",true);
+
+                xhr.onload = function() {
+                    var mydata = JSON.parse(this.responseText);
+                    var text="";
+                    $("#main").html(text);
+                    for (var x=0;x<mydata.length;x++)
+                    {
+                        var cat="";
+                        var address=mydata[x].address.city+" "+mydata[x].address.area+" "+mydata[x].address.addressLine+" "+mydata[x].openingTime+"الی"+mydata[x].closingTime;
+                        for (var y=0;y<mydata[x].categories.length;y++)
+                            cat+=mydata[x].categories[y].category.name+"-";
+                        text+='<div class="resturan row" >\n' +
+                            '            <div class="col-md-4 text-center">\n' +
+                            '                <img src="http://localhost:8080/api'+mydata[x].logo+'" height="70px" width="70px">\n' +
+                            '            </div>\n' +
+                            '            <div class="col-md-8 text-right">\n' +
+                            '                <h3>'+mydata[x].name+'</h3><br>\n' +
+                            '                <h6 style="color: gold">'+mydata[x].averageRate+'</h6><br>\n' +
+                            '                <b>'+cat+'</b><br>\n' +
+                            '                <b>'+address+'</b>\n' +
+                            '            </div>\n' +
+                            '        </div>';
+                    }
+                    $("#main").html(text);
+                };
+                xhr.send(formData);
+            });
+        });
+    </script>
+    <style>
+        .resturan{
+            height: 200px;
+            width: 25%;
+            float: right;
+            margin-right: 30px;
+            box-shadow: 10px 10px 5px #aaaaaa;
+            background-color: #e1e1e1;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid body">
+        <div class="row" style="height: 20%"></div>
+        <div class="row" style="height: 50%">
+            <div class="col-md-6 row" style=";margin-right: 30px">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="city" style="float: right">انختاب شهر</label>
+                        <select class="form-control" id="city">
+                            <option>تهران</option>
+                            <option>تبریز</option>
+                            <option>مشهد</option>
+                            <option>شیراز</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="area" style="float: right">منطقه را وارد کنید</label>
+                        <input id="area" type="text" class="form-control" >
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button style="background: none;border: none;outline: none" id="search"><img width="70" height="70" src="img/search.png"></button>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="height: 30%"> </div>
+    </div>
+    <div class="container-fluid row" style="height: 100%;padding-top: 50px">
+        <div class="col-md-1 text-right filter" style="direction: rtl;border: #4e555b 2px solid;padding: 0px;height: 100%">
+
+        </div>
+        <div class="col-md-11"  id="main" style=";height: 100%"></div>
+    </div>
+</body>
+</html>
