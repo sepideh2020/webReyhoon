@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -24,27 +25,46 @@ public class APIController {
     @Autowired
     private ResturanRepository resturanRep;
 
+    private searchModel seModel;
+
+    @PostMapping("/search")
+    public searchModel setSerchMode(@ModelAttribute searchModel se)
+    {
+        this.seModel=se;
+        return this.seModel;
+    }
+    @GetMapping("/search")
+    public searchModel setSerchMode()
+    {
+        return this.seModel;
+    }
 
     @PostMapping("/restaurant")
-    public List<Resturan> allResturan(@RequestParam String city,@RequestParam String area,@RequestParam(required = false) List<String> category)
+    public List<ResponseResturnModel> allResturan(@RequestParam String city,@RequestParam String area,@RequestParam(required = false) List<String> category)
     {
-        ArrayList<Resturan> list=new ArrayList<Resturan>();
+        ArrayList<ResponseResturnModel> list=new ArrayList<ResponseResturnModel>();
         for (Resturan x:resturanRep.findAll()) {
             if (x.getAddress()!=null&&x.getAddress().getArea().equals(area) && x.getAddress().getCity().equals(city))
                 if (category != null) {
-                    for (String cat : category) {
-                        Boolean f=true;
-                        for (Resturan_Catagory category1 : x.getCategories())
-                            if (!cat.equals(category1.getCategory().getName()))
-                                f=false;
-                        if (f)
-                            list.add(x);
-
+                    boolean f=false;
+                    for (Resturan_Catagory category1 : x.getCategories()) {
+                        for (String cat : category)
+                            if (cat.equals(category1.getCategory().getName())) {
+                                f=true;
+                                break;
+                            }
                     }
+                    if (f)
+                        list.add(this.ResturanMap(x));
                 } else
-                    list.add(x);
+                    list.add(this.ResturanMap(x));
         }
-
+        list.sort(new Comparator<ResponseResturnModel>() {
+            @Override
+            public int compare(ResponseResturnModel o1, ResponseResturnModel o2) {
+                return o2.getOpen().compareTo(o1.getOpen());
+            }
+        });
         return list;
     }
 
@@ -147,6 +167,30 @@ public class APIController {
     public List<Category> all()
     {
         return catRep.findAll();
+    }
+
+    public ResponseResturnModel ResturanMap(Resturan resturan)
+    {
+        ResponseResturnModel res=new ResponseResturnModel();
+        res.setId(resturan.getId());
+        res.setLogo(resturan.getLogo());
+        res.setAddress(resturan.getAddress());
+        res.setAverageRate(resturan.getAverageRate());
+        res.setClosingTime(resturan.getClosingTime());
+        res.setOpeningTime(resturan.getOpeningTime());
+        res.setName(resturan.getName());
+        res.setFoods(resturan.getFoods());
+        res.setCategories(resturan.getCategories());
+        res.setComments(resturan.getComments());
+        java.util.Date date=new java.util.Date();
+        if (Integer.parseInt(resturan.getOpeningTime())<date.getHours()&&Integer.parseInt(resturan.getClosingTime())>date.getHours())
+            res.setOpen(true);
+        else
+            res.setOpen(false);
+
+
+        return res;
+
     }
 
     public byte[] convert(Byte[] byteObjects)

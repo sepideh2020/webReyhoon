@@ -1,44 +1,38 @@
-package com.exmpel.resturan.Entity;
+package com.exmpel.resturan.Controller;
 
+import com.exmpel.resturan.Entity.Addres;
+import com.exmpel.resturan.Entity.Comment;
+import com.exmpel.resturan.Entity.Food;
+import com.exmpel.resturan.Entity.Resturan_Catagory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
-@Table(name = "resturans")
-public class Resturan {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ResponseResturnModel {
     private Long id;
 
     private String name;
-
-    @JsonIgnore
-    @OneToOne(mappedBy = "resturan",cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
-    private com.exmpel.resturan.Entity.Logo file;
 
     private String logo;
 
     private String openingTime;
     private String closingTime;
     private Double averageRate;
-
-    @OneToOne(mappedBy = "resturan",cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
     private Addres address;
-
-    @OneToMany(mappedBy = "resturan",cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
     private List<Resturan_Catagory> categories;
-
-    @OneToMany(mappedBy = "resturan",cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
     private List<Food> foods;
-
-
-    @OneToMany(mappedBy = "resturan",cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
     private List<Comment> comments;
 
+    private Boolean open;
 
+    public Boolean getOpen() {
+        return open;
+    }
+
+    public void setOpen(Boolean open) {
+        this.open = open;
+    }
 
     public Long getId() {
         return id;
@@ -56,6 +50,9 @@ public class Resturan {
         this.name = name;
     }
 
+    public String getLogo() {
+        return logo;
+    }
 
     public void setLogo(String logo) {
         this.logo = logo;
@@ -115,17 +112,5 @@ public class Resturan {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
-    }
-
-    public Logo getFile() {
-        return file;
-    }
-
-    public void setFile(Logo file) {
-        this.file = file;
-    }
-
-    public String getLogo() {
-        return logo;
     }
 }

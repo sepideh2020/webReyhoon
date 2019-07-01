@@ -1,0 +1,22 @@
+@font-face {
+    font-family: "Shabnam";
+    src: url("../fonts/Shabnam.eot");
+    src: url("../fonts/Shabnam.woff") format("woff"),
+    url("../fonts/Shabnam.ttf") format("ttf");
+}
+
+div.bac-img{
+    height: 17rem;
+    background-size: cover;
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-image: url("../mocks/restaurant-search-banner-2x.jpg");
+}
+div.card{
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);;width: 30%;height: 200px;margin-right: 30px;float: right;background-color: white;
+    margin-top: 20px;
+    font-family:Shabnam,Arial,Tahoma,serif;
+}
+button.buy{
+    border: #d43f3a 1px solid;border-radius: 10px;padding: 5px 20px;background-color: rgba(212,63,58,0.1)
+}

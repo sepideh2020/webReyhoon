@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <?xml version="1.0" encoding="UTF-8"?>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="..\assets\global.css">
+    <link rel="stylesheet" type="text/css" href="..\assets\main.css">
+    <link rel="stylesheet" type="text/css" href="..\assets\all_Res.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="..\assets\bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
+    <title>all</title>
+
+    <script>
+        var city,area;
+        $(document).ready(function () {
+            var xhr3 = new XMLHttpRequest();
+            xhr3.open("GET", "http://localhost:8080/api/search",true);
+
+            xhr3.onload = function() {
+                var mydata = JSON.parse(this.responseText);
+                city=mydata.city;
+                area=mydata.area;
+                var formData=new FormData();
+                formData.append("city", city);
+                formData.append("area", area);
+                var xhr1 = new XMLHttpRequest();
+                xhr1.open("POST", "http://localhost:8080/api/restaurant",true);
+
+                xhr1.onload = function() {
+                    var mydata = JSON.parse(this.responseText);
+                    myserarch=mydata;
+                    loaddoc(mydata);
+                };
+                xhr1.send(formData);
+            };
+            xhr3.send();
+            var myserarch=[];
+            var catsize=0;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "http://localhost:8080/api/category",true);
+
+            xhr.onload = function() {
+                var mydata = JSON.parse(this.responseText);
+                catsize=mydata.length;
+                var text="";
+                for (var x=0;x<mydata.length;x++)
+                {
+                    text+=' <div class="checkbox" style="padding: 10px 10px;border-bottom: 1px #d5cccc solid">\n' +
+                        '                        <input id="cat'+x+'" type="checkbox" value="'+mydata[x].name+'">\n' +
+                        '                        <label style="margin-right: 20px">'+mydata[x].name+'</label>\n' +
+                        '                    </div>';
+                }
+                $(".filter").html(text);
+            };
+            xhr.send();
+
+
+
+            $(".filter").on('click', 'div input', function() {
+
+                var catArr = [];
+                for (var y = 0; y < catsize; y++)
+                    if ($("#cat" + y).prop("checked")) {
+                        catArr.push($("#cat" + y).val());
+                    }
+
+                var formData=new FormData();
+                formData.append("city", city);
+                formData.append("area", area);
+                if (catArr.length!=0)
+                    formData.append("category",catArr);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "http://localhost:8080/api/restaurant",true);
+
+                xhr.onload = function() {
+                    var mydata = JSON.parse(this.responseText);
+                    myserarch=mydata;
+
+                    loaddoc(mydata);
+                };
+                xhr.send(formData);
+            });
+            $("#search-res").keyup(function () {
+                var serch_resturan=[];
+                for (var x=0;x<myserarch.length;x++)
+                {
+                    var str=JSON.stringify(myserarch[x].name);
+                    if (str.includes($(this).val()))
+                        serch_resturan.push(myserarch[x]);
+                }
+                loaddoc(serch_resturan);
+            });
+        });
+
+        function loaddoc(mydata) {
+            var text="";
+            $("#number_res").text(mydata.length);
+            $("#city_res").text(city+"-"+area);
+            $("#main").html(text);
+            for (var x=0;x<mydata.length;x++)
+            {
+                var open='';
+                if (!mydata[x].open)
+                    open='background-color:#e2e2e2';
+                var cat="";
+                var address=mydata[x].address.city+" - "+mydata[x].address.area+" "+mydata[x].address.addressLine+" - "+mydata[x].openingTime+"الی"+mydata[x].closingTime;
+                for (var y=0;y<mydata[x].categories.length-1;y++)
+                    cat+=mydata[x].categories[y].category.name+" - ";
+                cat+=mydata[x].categories[mydata[x].categories.length-1].category.name;
+                text+='<div class="row card" style="'+open+'">\n' +
+                    '                    <div class="text-center" style="width: 30%;min-height: 1px;float: right">\n' +
+                    '                        <img src="http://localhost:8080/api'+mydata[x].logo+'" style="width: 90%;height: 45%">\n' +
+                    '                    </div>\n' +
+                    '                    <div style="width: 2%;min-height: 1px;float: right"></div>\n' +
+                    '                    <div class="row text-right" style="padding: 10px ;height: 70%;width: 68%;min-height: 1px;float: right">\n' +
+                    '                        <div style="width: 100%;">\n' +
+                    '                            <b style="font-size: 22px">'+mydata[x].name+'</b>\n' +
+                    '                        </div>\n' +
+                    '                        <div style="width: 100%;margin-top: 5px;float: right">\n' +
+                    '                            <div id="rateYo'+mydata[x].id+'" style="display: inline;width: 60%;float: right"></div>\n' +
+                    '                            <b style="font-size: 18px;float: right;color: #F39C12">'+mydata[x].averageRate+'</b>\n' +
+                    '                        </div>\n' +
+                    '                        <div style="width: 100%;margin-top: 5px;float: right">\n' +
+                    '                            <b style="font-size: 13px;">'+cat+'</b>\n' +
+                    '                        </div>\n' +
+                    '                        <div style="width: 100%;margin-top: 5px;float: right">\n' +
+                    '                            <b style="font-size: 13px;color: #9c9595">'+address+'</b>\n' +
+                    '                        </div>\n' +
+                    '                    </div>\n' +
+                    '                    <div class="text-center" style="width: 100%;float: right;padding: 20px 0px">\n' +
+                    '                        <button class="buy" style="">شروع سفارش</button>\n' +
+                    '                    </div>\n' +
+                    '                </div>';
+            }
+            $("#main").html(text);
+            for (var x=0;x<mydata.length;x++)
+            {
+                rateload("rateYo"+mydata[x].id,mydata[x].averageRate)
+            }
+        };
+
+        function rateload(id,rate) {
+
+            $("#"+id).rateYo({
+                rating: rate
+            });
+            $("#"+id).rateYo("option", "starWidth", "20px");
+
+        };
+    </script>
+</head>
+<body>
+<div class="topnav">
+    <ul>
+        <li ><a href="login.html">ورود</a></li>
+        <li><a href="register.html">عضویت</a></li>
+        <li class="pd"><a href="#راهنما ">راهنما</a></li>
+        <li> <a href="#reyhoon"></a></li>
+    </ul>
+</div>
+<div class="bac-img"></div>
+<div class="container-fluid" style="background-color: #e2e2e2">
+    <div class="row">
+        <div class="col-md-6"></div>
+        <div class="col-md-6" style="padding: 20px 10px">
+            <b id="number_res" style="font-family:Shabnam,Arial,Tahoma,serif;font-size: 14px "></b>
+            <b style="font-family:Shabnam,Arial,Tahoma,serif;font-size: 14px ">
+                 رستوران امکان سرویس دهی
+            </b>
+            <b id="city_res" style="font-family:Shabnam,Arial,Tahoma,serif;font-size: 18px "></b>
+            <b style="font-family:Shabnam,Arial,Tahoma,serif;font-size: 14px ">
+                 را دارند
+            </b>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 20px">
+        <div class="col-md-8"></div>
+        <div class="col-md-4">
+            <input type="text" style="direction: rtl" class="form-control" id="search-res" placeholder="کلمه مورد نظر را وارد کنید">
+        </div>
+    </div>
+    <div class="row" style="margin-top: 20px">
+        <div style="width: 2%;float: right;min-height: 1px"></div>
+        <div style="width: 20%;float: right;min-height: 1px">
+            <div class="panel panel-default">
+                <div class="panel-heading text-center">فیلتر بر اساس نوع غذاها</div>
+                <div class="panel-body filter" style="padding: 0px">
+                </div>
+            </div>
+        </div>
+        <div style="width: 3%;float: right;min-height: 1px"></div>
+        <div style="width: 73%;float: right;height: auto">
+            <div class="row" id="main" style="overflow-y: auto">
+
+            </div>
+        </div>
+        <div style="width: 2%;float: right;min-height: 1px"></div>
+    </div>
+</div>
+<div class="aboutBd" style="margin-top: 0px">
+    <div class="aboutSqDes">مراقبت و محافظت از حساب کاربری و رمزعبور هر کاربر بر عهده کاربر است. ریحون سریعترین راه سفارش آنلاین غذا است. منوی عکس‌دار رستوران‌های اطرافتان را بر اساس مکان خود به راحتی مشاهده کنید و سفارش دهید.
+        <br>
+        <a href="#">لیست رستوران‌ها</a>
+    </div>
+    <div class="aboutSq">
+        <div class="aboutSqInner"  style="border-top-color:#801683">
+            <div>تماس با ریحون</div>
+            <a href="#">درباره ریحون</a>
+            <a href="#">تماس با ما</a>
+            <a href="#">وبلاگ ریحون</a>
+        </div>
+        <div class="aboutSqInner" style="border-top-color:#D50077">
+            <div>رستوران‌ها</div>
+            <a>ثبت رستوران</a>
+        </div>
+        <div class="aboutSqInner" style="border-top-color:#E10509">
+            <div>پشتیبانی ریحونا</div>
+            <a href="#">سوالات متداول</a>
+            <a href="#">تماس با پشیبانی</a>
+            <a href="#">قوانین و مقررات</a>
+        </div>
+        <div class="aboutSqInner" style="border-top-color:#E7CA06">
+            <div>اپلیکیشن‌های موبایل</div>
+            <a href="#">
+                <img src="../mocks/application download link/google-play-dark.png" alt="googplay logo">
+            </a>
+            <a href="#">
+                <img  src="../mocks/application download link/sib-app-dark.png" alt="sib app">
+            </a>
+            <a href="#">
+                <img src="../mocks/application download link/cafebazaar-dark.png" alt="bazar logo">
+            </a>
+
+        </div>
+
+    </div>
+    <div class="sponser">
+        <div>
+            <img src="../mocks/application download link/kasbokar.png" alt="anjomane kasbo kar internety logo">
+        </div>
+
+        <div>
+            <img src="../mocks/application download link/electronic.png" alt="namade etemade electronicie logo">
+        </div>
+    </div>
+</div>
+<div class="footer" style="margin-top: 560px;height: 120px">
+    <div class="footerIcon">
+        <a href="#">&#xf0d5;</a>
+        <a href="#">&#xf16d;</a>
+        <a href="#">&#xf099;</a>
+        <a href="#">&#xf09a;</a>
+        <a href="#">&#xf2c6;</a>
+    </div>
+    <div class="copyRight">&#169;2017,Reyhoon,All Reserved.</div>
+</div>
+</body>
+</html>
