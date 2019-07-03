@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <?xml version="1.0" encoding="UTF-8"?>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="..\assets\global.css">
+    <link rel="stylesheet" type="text/css" href="..\assets\main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="..\assets\bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
+    <style>
+        body{
+
+            background-image: url("../mocks/Pizza.jpg") ;
+            background-attachment: fixed;
+            background-size: cover;
+            height: 100vh;
+            direction: rtl;
+        }
+        a{
+            font-family: Arial;
+            text-decoration: none;
+            color: black;
+            float: right;
+        }
+        ul.nav li{
+            width: 33%;
+            text-align: center;
+        }
+        ul.nav li a{
+            padding-right: 25%;
+        }
+
+
+        button{
+         
+            transition: 0.1s;
+            background-color:white;
+            border: 1px #DC143C solid;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-family: FontAwesome;
+            color:	#DC143C;
+            float:right;
+            margin-right:10px;
+            opacity:1; 
+          
+        }   
+
+        button:hover{
+           
+            background-color:#eeeeee;
+        }
+        
+
+        .Uinfo:hover{
+           
+            color: #C7068A;
+            border-bottom: 2px solid #C7068A;
+	        box-sizing: border-box;	
+        }
+
+        	
+
+
+    </style>
+    <script>
+        $(document).ready(function () {
+            var id=9,searchArr;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "http://localhost:8080/api/restaurant/"+id,true);
+
+            xhr.onload = function() {
+                var mydata = JSON.parse(this.responseText);
+                searchArr=mydata;
+                $("#logo").attr("src", "http://localhost:8080/api"+mydata.logo);
+                $("#name").text(mydata.name);
+                $("#info_name").text(mydata.name);
+                $("#avgrate").text(mydata.averageRate);
+                $("#clock").text("از"+   mydata.openingTime + "ظهر"+ "تا "+ mydata.closingTime +"شب");
+                $("#rateYo").rateYo({
+                    rating: mydata.averageRate
+                });
+
+                $("#rateYo").rateYo("option", "starWidth", "20px");
+                var cat="";
+                var address=mydata.address.city+" "+mydata.address.area+" "+mydata.address.addressLine;
+                for (var y=0;y<mydata.categories.length;y++)
+                    cat+=mydata.categories[y].category.name+".";
+                $("#address").text(address);
+                $("#address-res").text(address);
+                $("#cats").text(cat);
+                var text='';
+                for (var x=0;x<mydata.categories.length;x++)
+                {
+                    text +='<div style="float: right;width: 100%;margin-top: 20px;padding: 10px 0px" class="text-right">\n' +
+                        '                <h2>'+mydata.categories[x].category.name+'</h2><br>';
+                    for (var y=0;y<mydata.foods.length;y++)
+                    {
+                        var food=mydata.foods[y];
+                        if (food.foodSet==mydata.categories[x].category.name)
+                        {
+                            text+='<div style="     box-shadow: rgba(149, 149, 149, 0.2) 0px 4px 8px 0px, rgba(131, 131, 131, 0.19) 0px 6px 20px 0px;;width: 48%;margin-left: 15px;margin-top: 10px;background-color: white;float: right;padding: 20px;height: 135px" class="text-right">\n' +
+                                    '<div class="row"><div class="col-md-3 text-left">' +'<b style="display: block;font-size: 12px;color: black">'+food.price+'000'+'تومان'+'</b>'+
+                                '</div><div class="col-md-9 text-right"><b style="display: block;font-size: 16px">'+food.name+'</b></div></div><br>\n'+
+                                '                    <b style="display: block;color: #69727a;font-size: 11px">'+food.description+'</b>\n' +
+                                '                    <br>\n' +
+                                '                    <div class="row text-center">\n' +
+                                '                        <button  type="button"> &#xf067; افزودن به سبد خرید</button>\n' +
+                                '                    </div>\n' +
+                                '                </div>';
+                        }
+                    }
+                    text+='</div>';
+                }
+                $("#menu_food").html(text);
+                text='<b style="display: block;font-size: 25px">نظرات</b>\n' +
+                    '            <div class="row" style="height: 2px;background-color: #9c9595"></div>\n' +
+                    '            <div class="row" style="height: 15px;"></div>';
+                for (var x=0;x< mydata.comments.length;x++)
+                {
+                    var com=mydata.comments[x];
+                    text+='<div style="width: 100%;border-bottom: #a9a1a1 1px solid;height: auto;padding: 20px">\n' +
+                            '<div class="row"> <div class="col-md-4 row" style="padding: 0px">' +
+                        '<div class="col-md-3"><b style="font-size: 15px;color: #F39C12">'+com.quality+'</b></div><div id="rate'+x+'" class="col-md-9"></div> </div><div class="col-md-8" style="padding: 0px"><b style="font-size: 15px">'+com.author+'</b></div> </div>'+
+                        '               <br> <b style="margin-right: 13px;font-size: 10px;">'+com.text+'</b><br>\n' +
+                        '            </div><br>';
+                }
+                $("#coomm_food").html(text);
+                for (var x=0;x< mydata.comments.length;x++)
+                {
+                    var com=mydata.comments[x];
+                    $("#rate"+x).rateYo({
+                        rating:com.quality
+                    });
+                    $("#rate"+x).rateYo("option", "starWidth", "20px");
+                }
+
+            };
+            xhr.send();
+
+            $("#search").keyup(function () {
+                var serch_resturan=[];
+                for (var x=0;x<searchArr.foods.length;x++)
+                {
+                    var str=JSON.stringify(searchArr.foods[x].name);
+                    if (str.includes($(this).val()))
+                        serch_resturan.push(searchArr[x]);
+                }
+                var mydata=searchArr;
+                var text='';
+                for (var x=0;x<mydata.categories.length;x++)
+                {
+                    text +='<div style="float: right;width: 100%;margin-top: 20px;padding: 10px 0px" class="text-right">\n' +
+                        '                <h2>'+mydata.categories[x].category.name+'</h2><br>';
+                    for (var y=0;y<mydata.foods.length;y++)
+                    {
+                        var food=mydata.foods[y];
+                        if (food.foodSet==mydata.categories[x].category.name)
+                        {
+                             text+='<div style="     box-shadow: rgba(149, 149, 149, 0.2) 0px 4px 8px 0px, rgba(131, 131, 131, 0.19) 0px 6px 20px 0px;;width: 48%;margin-left: 15px;margin-top: 10px;background-color: white;float: right;padding: 20px;height: 135px" class="text-right">\n' +
+                                    '<div class="row"><div class="col-md-3 text-left">' +'<b style="display: block;font-size: 12px;color: black">'+food.price+'000'+'تومان'+'</b>'+
+                                '</div><div class="col-md-9 text-right"><b style="display: block;font-size: 16px">'+food.name+'</b></div></div><br>\n'+
+                                '                    <b style="display: block;color: #69727a;font-size: 11px">'+food.description+'</b>\n' +
+                                '                    <br>\n' +
+                                '                    <div class="row text-center">\n' +
+                                '                        <button type="button"> &#xf067; افزودن به سبد خرید</button>\n' +
+                                '                    </div>\n' +
+                                '                </div>';
+                        }
+                    }
+                    text+='</div>';
+                }
+                $("#menu_food").html(text);
+            });
+
+
+            $("div.link a").mouseenter(function () {
+               $(this).css("border-top","red 2px solid");
+            });
+            $("div.link a").mouseleave(function () {
+               $(this).css("border-top","none");
+            });
+
+
+        });
+    </script>
+</head>
+
+<div class="topnav">
+    <ul>
+        <li ><a href="login.html">ورود</a></li>
+        <li><a href="register.html">عضویت</a></li>
+        <li class="pd"><a href="#راهنما ">راهنما</a></li>
+        <li> <a href="#reyhoon"></a></li>
+    </ul>
+</div>
+    <div class="text-center" style="font-family: Shabnam,Arial,Tahoma,serif;position: absolute;background-color: white;top:160px;left: 25%;box-shadow: 10px 10px 5px #aaaaaa;width: 50%;z-index: 1;height: 250px;">
+        <img id="logo" class="img-thumbnail" height="80px" width="120px" style="position: absolute;top: -40px;left: 40%">
+        <div class="row" style="height: 50px"></div>
+        <b id="name" style="display: block;font-size: 22px"></b>
+        <div class="row" style="height: 10px"></div>
+        <div class="row text-center">
+            <div  class="col-md-4" ></div>
+            <div class="col-md-1 text-right" style="padding: 0px 5px;">
+
+                <b id="avgrate" style="color: #F39C12;font-size: 18px;" ></b>
+            </div>
+            <div id="rateYo" class="col-md-4" style="padding: 0px"></div>
+
+        </div>
+        <b id="cats" style="display: block;color: black;font-size: 14px" ></b>
+        <div class="row" style="height: 10px"></div>
+        <b id="address" style="font-size: 12px;display: block;font-size: 11px;color: #4e555b"></b>
+        <nav id="nav_menu" class="navbar navbar-default navbar-fixed-bottom "  style="width: 100%;position: absolute;">
+                <ul class="nav navbar-nav">
+                    <li class="Uinfo"><a  href="#coomm_food">نظرات کاربران</a></li>
+                    <li class="Uinfo"><a  href="#address_food">اطلاعات رستوران</a></li>
+                    <li class="Uinfo" style="background: none"><a  href="#menu_food">منوی رستوران</a></li>
+                </ul>
+        </nav>
+    </div>
+    <div style="position: absolute;background-color: #eeeeee;padding: 150px 25%;top: 315px;left: 0px;z-index: -0;height: auto;width: 100%">
+        <div class="row">
+            <input class="form-control" id="search" style="font-family: FontAwesome;" placeholder=" &#xf002; جستجو در منوی این رستوران">
+        </div>
+        <div class="row" id="menu_food" style="padding: 10px 0px">
+
+        </div>
+        <div class="row" style="height: 10px"></div>
+        <div class=" text-right" id="address_food" style="padding: 30px 0px;font-family: Shabnam,Arial,Tahoma,serif;">
+            <b style="font-size: 25px;display: block">اطلاعات رستوران</b>
+            <div class="row" style="height: 2px;background-color: #9c9595"></div>
+            <div class="row" style="height: 15px;"></div>
+            <b style="display: block;font-size: 22px" id="info_name"></b>
+            <div class="row" style="height: 10px;"></div>
+            <b style="margin-right: 10px;font-size: 17px; font-family: FontAwesome;">&#xf124;  آدرس :</b>
+            <b style="font-size: 13px" id="address-res"></b>
+            <br>
+            <b style="margin-right: 10px;font-size: 16px;font-family: FontAwesome;"> &#xf017; ساعت سفارش گیری :</b>
+            <div class="row" style="padding-top: 20px">
+                <div class="col-md-6"></div>
+                <div class="col-md-6 row " style="padding: 0px">
+                    <div class="col-md-6 text-left" style="padding: 0px">
+                        <b id="clock"></b>
+                    </div>
+                    <div class="col-md-6 text-right" style="font-weight: bold;">همه روزه</div>
+                </div>
+            </div>
+        </div><br><br>
+        <div class=" text-right" id="coomm_food" style="padding: 30px 0px">
+
+        </div>
+
+    </div>
+</body>
+</html>

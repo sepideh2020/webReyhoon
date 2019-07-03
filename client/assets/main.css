@@ -771,13 +771,12 @@ a.prevlocation:hover{
 	}
 	
 .aboutSqDes >a{
-	color:#031BA7;
+	color:#8F8787;
 	text-decoration:none;
 	line-height:40px;
-
 	
 	}
-	
+
 	
 .sponser{
 	width:19%;
@@ -796,6 +795,7 @@ a.prevlocation:hover{
 	width:100%;
 	height:160px;
 	margin-top:1500px;
+
 	}
 
 
@@ -826,8 +826,13 @@ a.prevlocation:hover{
 	background-color:#151515;
 	text-decoration:none;
 	
-	}
 	
+	}
+	.footerIcon> a:hover{
+		text-decoration: none;
+		color: #646161;
+		
+	}
 
 .copyRight{
 	position:relative;
@@ -838,6 +843,7 @@ a.prevlocation:hover{
 	margin-top:50px;
 	color:#646161;
 	font-size:1em;
+	direction: ltr;
 	}
 
 

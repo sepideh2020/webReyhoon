@@ -25,7 +25,7 @@
     <title>all</title>
 
     <script>
-        var city,area;
+        var city,area,categoryArr,catsize;
         $(document).ready(function () {
             var xhr3 = new XMLHttpRequest();
             xhr3.open("GET", "http://localhost:8080/api/search",true);
@@ -49,22 +49,15 @@
             };
             xhr3.send();
             var myserarch=[];
-            var catsize=0;
+            catsize=0;
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "http://localhost:8080/api/category",true);
 
             xhr.onload = function() {
                 var mydata = JSON.parse(this.responseText);
+                categoryArr=mydata;
                 catsize=mydata.length;
-                var text="";
-                for (var x=0;x<mydata.length;x++)
-                {
-                    text+=' <div class="checkbox" style="padding: 10px 10px;border-bottom: 1px #d5cccc solid">\n' +
-                        '                        <input id="cat'+x+'" type="checkbox" value="'+mydata[x].name+'">\n' +
-                        '                        <label style="margin-right: 20px">'+mydata[x].name+'</label>\n' +
-                        '                    </div>';
-                }
-                $(".filter").html(text);
+                catload(mydata);
             };
             xhr.send();
 
@@ -72,12 +65,23 @@
 
             $(".filter").on('click', 'div input', function() {
 
+                var cattext='[';
                 var catArr = [];
-                for (var y = 0; y < catsize; y++)
+                for (var y = 0; y < catsize; y++) {
                     if ($("#cat" + y).prop("checked")) {
                         catArr.push($("#cat" + y).val());
+                        cattext+= '{ "name":"' + $("#cat" + y).val() + '","chek":' + true + '}';
                     }
-
+                    else
+                        cattext+= '{ "name":"' + $("#cat" + y).val() + '","chek":' + false + '}';
+                    if (y!=catsize-1)
+                        cattext+=',';
+                }
+                cattext+="]";
+                var obj = JSON.parse(cattext);
+                obj.sort((a, b) => (b.chek > a.chek) ? 1 : -1);
+                console.log(obj);
+                catload(obj);
                 var formData=new FormData();
                 formData.append("city", city);
                 formData.append("area", area);
@@ -104,24 +108,51 @@
                 }
                 loaddoc(serch_resturan);
             });
+            $(".row_main").on('mouseenter', 'div div.card', function(){
+                $(this).css("box-shadow"," 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)") ;
+            });
+            $(".row_main").on('mouseleave', 'div div.card', function(){
+                $(this).css("box-shadow","0 4px 8px 0 rgba(149, 149, 149, 0.2), 0 6px 20px 0 rgba(131, 131, 131, 0.19)") ;
+            });
         });
 
-        function loaddoc(mydata) {
+        function catload(mydata) {
             var text="";
+            for (var x=0;x<mydata.length;x++)
+            {
+                text+=' <div class="checkbox" style="padding: 10px 10px;border-bottom: 1px #d5cccc solid">\n' +
+                    '                        <input id="cat'+x+'" type="checkbox" value="'+mydata[x].name+'">\n' +
+                    '                        <label style="margin-right: 20px">'+mydata[x].name+'</label>\n' +
+                    '                    </div>';
+            }
+            $(".filter").html(text);
+            if (mydata[0].chek!=null)
+            {
+                for (var y = 0; y < catsize; y++) {
+                    if (mydata[y].chek) {
+                        $("#cat" + y).prop("checked", true);
+                        $("#cat" + y).css("background-color","red");
+                    }
+                }
+            }
+        }
+
+        function loaddoc(mydata) {
+            var text="",text1="";
             $("#number_res").text(mydata.length);
             $("#city_res").text(city+"-"+area);
             $("#main").html(text);
             for (var x=0;x<mydata.length;x++)
             {
-                var open='';
+                var open='',tt='';
                 if (!mydata[x].open)
                     open='background-color:#e2e2e2';
                 var cat="";
-                var address=mydata[x].address.city+" - "+mydata[x].address.area+" "+mydata[x].address.addressLine+" - "+mydata[x].openingTime+"الی"+mydata[x].closingTime;
+                var address=mydata[x].address.city+" - "+mydata[x].address.area+" "+mydata[x].address.addressLine+" - "+ mydata[x].openingTime+"صبح "+"الی"+mydata[x].closingTime+"شب";
                 for (var y=0;y<mydata[x].categories.length-1;y++)
                     cat+=mydata[x].categories[y].category.name+" - ";
                 cat+=mydata[x].categories[mydata[x].categories.length-1].category.name;
-                text+='<div class="row card" style="'+open+'">\n' +
+                tt='<div class="row card" style="'+open+'">\n' +
                     '                    <div class="text-center" style="width: 30%;min-height: 1px;float: right">\n' +
                     '                        <img src="http://localhost:8080/api'+mydata[x].logo+'" style="width: 90%;height: 45%">\n' +
                     '                    </div>\n' +
@@ -142,11 +173,17 @@
                     '                        </div>\n' +
                     '                    </div>\n' +
                     '                    <div class="text-center" style="width: 100%;float: right;padding: 20px 0px">\n' +
-                    '                        <button class="buy" style="">شروع سفارش</button>\n' +
+                    '                        <button class="buy"   style="">شروع سفارش</button>\n' +
                     '                    </div>\n' +
                     '                </div>';
+                if (mydata[x].open)
+                    text+=tt;
+                else
+                    text1+=tt;
             }
+
             $("#main").html(text);
+            $("#close_main").html(text1);
             for (var x=0;x<mydata.length;x++)
             {
                 rateload("rateYo"+mydata[x].id,mydata[x].averageRate)
@@ -190,12 +227,12 @@
     <div class="row" style="margin-top: 20px">
         <div class="col-md-8"></div>
         <div class="col-md-4">
-            <input type="text" style="direction: rtl" class="form-control" id="search-res" placeholder="کلمه مورد نظر را وارد کنید">
+            <input type="text" style="direction: rtl;font-family: FontAwesome;" class="form-control" id="search-res" placeholder="&#xf002;  جست و جو رستوران در این محدوده ">
         </div>
     </div>
     <div class="row" style="margin-top: 20px">
         <div style="width: 2%;float: right;min-height: 1px"></div>
-        <div style="width: 20%;float: right;min-height: 1px">
+        <div style="width: 20%;padding: 30px 0px;float: right;min-height: 1px">
             <div class="panel panel-default">
                 <div class="panel-heading text-center">فیلتر بر اساس نوع غذاها</div>
                 <div class="panel-body filter" style="padding: 0px">
@@ -203,8 +240,14 @@
             </div>
         </div>
         <div style="width: 3%;float: right;min-height: 1px"></div>
-        <div style="width: 73%;float: right;height: auto">
-            <div class="row" id="main" style="overflow-y: auto">
+        <div class="row_main" style="width: 73%;padding: 10px 0px;float: right;height: auto">
+            <div class="row" id="main" style="padding: 10px 0px">
+
+            </div>
+            <br>
+            <br>
+            <h3 class="text-right">رستوران های بسته</h3>
+            <div class="row" id="close_main" style="padding: 10px 0px">
 
             </div>
         </div>
@@ -248,7 +291,7 @@
         </div>
 
     </div>
-    <div class="sponser">
+    <div class="sponser" >
         <div>
             <img src="../mocks/application download link/kasbokar.png" alt="anjomane kasbo kar internety logo">
         </div>
@@ -258,8 +301,8 @@
         </div>
     </div>
 </div>
-<div class="footer" style="margin-top: 560px;height: 120px">
-    <div class="footerIcon">
+<div class="footer" style="margin-top:560px;height: 150px;">
+    <div class="footerIcon" >
         <a href="#">&#xf0d5;</a>
         <a href="#">&#xf16d;</a>
         <a href="#">&#xf099;</a>
