@@ -63,7 +63,9 @@
 
         button:hover{
            
-            background-color:#eeeeee;
+            opacity: 1;
+            color:#eee;
+           background-color:#DC143C;
         }
         
 
@@ -74,13 +76,19 @@
 	        box-sizing: border-box;	
         }
 
-        	
+        #search:focus {
+         border-color:#E1007E;
+         box-shadow: 0 0 2px 0 #E1007E;
+        }
+
 
 
     </style>
     <script>
         $(document).ready(function () {
-            var id=9,searchArr;
+            
+            var id,searchArr;
+            id=sessionStorage.getItem("myCat");
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "http://localhost:8080/api/restaurant/"+id,true);
 

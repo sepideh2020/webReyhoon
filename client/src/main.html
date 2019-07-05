@@ -29,7 +29,7 @@
                 formData.append("area", $("#area").val());
                 xhr.open("POST", "http://localhost:8080/api/search",true);
                 xhr.onload = function() {
-                    location.replace("all_Res.html");
+                   window.open("all_Res.html");
                 };
                 xhr.send(formData);
         };
@@ -51,14 +51,14 @@
      <div class="intro">سفارش آنلاین غذا از بهترین رستوران ها و فست فود ها</div>
      <div class="dis">برای دیدن لیست رستوران‌ها و فست‌فود‌هایی که به شما سرویس می‌دهند، منطقه خود را وارد کنید.</div>
 
-     <div class="inputfm">
-         <input id="search" onclick="set()" type="submit" value="&#xf002">
+     <div class="inputfm" >
+         <input id="search"  onclick="set()" type="submit" value="&#xf002">
          <div>
            <input class="form-control location" type="text" id="area" name="location" placeholder="&#xf041;   مثلا نیاوران">
          </div>
          <span class="disloc">منطقه خود را وارد کنید</span>
          <div>
-           <select id="city" class="form-control" style="height: 70px;margin-top: 10px;display: initial;font-size: 25px;width: 120px" id="cname" name="location">
+           <select id="city" class="form-control" style="height: 70px;margin-top: 10px; display: initial;font-size: 25px;width: 120px"   id="cname" name="location" >
                  <option>تهران</option>
                  <option>تبریز</option>
                  <option>مشهد</option>

@@ -162,8 +162,8 @@
                     '                            <b style="font-size: 22px">'+mydata[x].name+'</b>\n' +
                     '                        </div>\n' +
                     '                        <div style="width: 100%;margin-top: 5px;float: right">\n' +
-                    '                            <div id="rateYo'+mydata[x].id+'" style="display: inline;width: 60%;float: right"></div>\n' +
-                    '                            <b style="font-size: 18px;float: right;color: #F39C12">'+mydata[x].averageRate+'</b>\n' +
+                    '                            <div  id="rateYo'+mydata[x].id+'" style="display: inline;width: 60%;float: right"></div>\n' +
+                    '                            <b style="font-size: 18px;float: right;color: #F39C12   ">'+mydata[x].averageRate+'</b>\n' +
                     '                        </div>\n' +
                     '                        <div style="width: 100%;margin-top: 5px;float: right">\n' +
                     '                            <b style="font-size: 13px;">'+cat+'</b>\n' +
@@ -173,13 +173,16 @@
                     '                        </div>\n' +
                     '                    </div>\n' +
                     '                    <div class="text-center" style="width: 100%;float: right;padding: 20px 0px">\n' +
-                    '                        <button class="buy"   style="">شروع سفارش</button>\n' +
+                    '                        <button type="submit"  class="buy" id='+ mydata[x].id + ' onclick="pageRedirect(id)" >شروع سفارش</button>\n' +
                     '                    </div>\n' +
                     '                </div>';
                 if (mydata[x].open)
                     text+=tt;
                 else
                     text1+=tt;
+
+                      
+        
             }
 
             $("#main").html(text);
@@ -189,6 +192,14 @@
                 rateload("rateYo"+mydata[x].id,mydata[x].averageRate)
             }
         };
+        
+
+        function pageRedirect(x) {
+            sessionStorage.setItem('myCat', x);  
+               window.location.href = "resturan.html";
+           
+    } 
+
 
         function rateload(id,rate) {
 
@@ -198,6 +209,8 @@
             $("#"+id).rateYo("option", "starWidth", "20px");
 
         };
+
+       
     </script>
 </head>
 <body>
